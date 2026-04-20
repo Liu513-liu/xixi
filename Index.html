@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">      
+    <title>互动笑脸</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);      
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 80px;
+        }
+
+        /* 笑脸样式 */
+        .face {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: #ffd93d;
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 20px 60px rgba(255, 217, 61, 0.3);
+        }
+
+        .face.happy {
+            background: #ffd93d;
+            box-shadow: 0 20px 60px rgba(255, 217, 61, 0.4);
+        }
+
+        .face.sad {
+            background: #6b7280;
+            box-shadow: 0 20px 60px rgba(107, 114, 128, 0.4);
+        }
+
+        .face.angry {
+            background: #ef4444;
+            box-shadow: 0 20px 60px rgba(239, 68, 68, 0.4);
+        }
+
+        .face.surprised {
+            background: #8b5cf6;
+            box-shadow: 0 20px 60px rgba(139, 92, 246, 0.4);
+        }
+
+        /* 眼睛 */
+        .eyes {
+            position: absolute;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+        }
+
+        .eye {
+            width: 20px;
+            height: 20px;
+            background: #1a1a2e;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pupil {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.2s ease;
+        }
+
+        .face.happy .eye {
+            height: 10px;
+            border-radius: 0 0 20px 20px;
+            background: #1a1a2e;
+        }
+
+        .face.sad .eye {
+            height: 10px;
+            border-radius: 20px 20px 0 0;
+            background: #1a1a2e;
+        }
+
+        .face.angry .eye {
+            width: 25px;
+            height: 8px;
+            border-radius: 0;
+            transform: rotate(20deg);
+        }
+
+        .face.angry .eye:last-child {
+            transform: rotate(-20deg);
+        }
+
+        .face.surprised .eye {
+            width: 25px;
+            height: 25px;
+        }
+
+        /* 嘴巴 */
+        .mouth {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: all 0.3s ease;
+        }
+
+        .face.happy .mouth {
+            width: 80px;
+            height: 40px;
+            border: 6px solid #1a1a2e;
+            border-top: none;
+            border-radius: 0 0 80px 80px;
+            background: transparent;
+        }
+
+        .face.sad .mouth {
+            width: 60px;
+            height: 30px;
+            border: 6px solid #1a1a2e;
+            border-bottom: none;
+            border-radius: 60px 60px 0 0;
+            background: transparent;
+        }
+
+        .face.angry .mouth {
+            width: 50px;
+            height: 10px;
+            background: #1a1a2e;
+            border-radius: 5px;
+        }
+
+        .face.surprised .mouth {
+            width: 40px;
+            height: 50px;
+            background: #1a1a2e;
+            border-radius: 20px;
+        }
+
+        /* 眉毛（仅生气时显示） */
+        .eyebrows {
+            position: absolute;
+            top: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 35px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .face.angry .eyebrows {
+            opacity: 1;
+        }
+
+        .eyebrow {
+            width: 30px;
+            height: 8px;
+            background: #1a1a2e;
+            border-radius: 4px;
+            transform: rotate(25deg);
+        }
+
+        .eyebrow:last-child {
+            transform: rotate(-25deg);
+        }
+
+        /* 鼻子 */
+        .nose {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .face.happy .nose {
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .face.sad .nose {
+            transform: translateX(-50%) scale(0.9);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* 腮红 */
+        .cheeks {
+            position: absolute;
+            top: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 80px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .face.happy .cheeks {
+            opacity: 1;
+        }
+
+        .cheek {
+            width: 30px;
+            height: 20px;
+            background: rgba(255, 107, 107, 0.4);
+            border-radius: 50%;
+            filter: blur(3px);
+        }
+
+        /* 面部高光 */
+        .face::after {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            width: 40px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: rotate(-20deg);
+            filter: blur(5px);
+        }
+
+        /* 耳朵 */
+        .ears {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 160px;
+            z-index: -1;
+        }
+
+        .ear {
+            width: 30px;
+            height: 40px;
+            background: #ffd93d;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .face.sad .ear {
+            background: #6b7280;
+            transform: rotate(-10deg);
+        }
+
+        .face.sad .ear:last-child {
+            transform: rotate(10deg);
+        }
+
+        /* 汗滴（惊讶时显示） */
+        .sweat {
+            position: absolute;
+            top: 40px;
+            right: 30px;
+            width: 15px;
+            height: 20px;
+            background: #87CEEB;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .face.surprised .sweat {
+            opacity: 1;
+            animation: drop 1s ease-in-out infinite;
+        }
+
+        @keyframes drop {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(5px);
+            }
+        }
+
+        /* 选项区域 */
+        .options-container {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            height: 80px;
+        }
+
+        .option {
+            width: 120px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .option.happy-opt {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            background: #ffd93d;
+            color: #1a1a2e;
+        }
+
+        .option.sad-opt {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: #6b7280;
+        }
+
+        .option.angry-opt {
+            background: #ef4444;
+        }
+
+        .option.surprised-opt {
+            background: #8b5cf6;
+        }
+
+        /* 增强表情效果 */
+        .face {
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .face.happy {
+            animation: happyPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes happyPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .face.sad {
+            animation: sadPulse 2.5s ease-in-out infinite;
+        }
+
+        @keyframes sadPulse {
+            0%, 100% {
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                transform: scale(0.95) translateY(5px);
+            }
+        }
+
+        /* 提示文字 */
+        .hint {
+            position: absolute;
+            bottom: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+        }
+
+        /* 游戏区域 */
+        .game-area {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 8s linear infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 按钮动画效果 */
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-5px);
+            }
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* 粒子效果 */
+        .particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 217, 61, 0.6);
+            border-radius: 50%;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-20px) scale(1.2);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+
+    <!-- 主游戏区域 -->
+    <div class="game-area">
+        <div class="container">
+            <!-- 笑脸 -->
+            <div class="face happy" id="face">
+                <div class="ears">
+                    <div class="ear"></div>
+                    <div class="ear"></div>
+                </div>
+                <div class="eyebrows">
+                    <div class="eyebrow"></div>
+                    <div class="eyebrow"></div>
+                </div>
+                <div class="eyes">
+                    <div class="eye">
+                        <div class="pupil"></div>
+                    </div>
+                    <div class="eye">
+                        <div class="pupil"></div>
+                    </div>
+                </div>
+                <div class="nose"></div>
+                <div class="cheeks">
+                    <div class="cheek"></div>
+                    <div class="cheek"></div>
+                </div>
+                <div class="mouth"></div>
+                <div class="sweat"></div>
+            </div>
+        </div>
+
+        <!-- 选项区域 -->
+                <div class="hint">五一假期你回家吗？？？</div>
+        <div class="options-container" id="optionsContainer">
+            <div class="option happy-opt" data-emotion="happy">回家</div>
+            <div class="option sad-opt" data-emotion="sad">留校</div>
+        </div>
+
+ 
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const face = document.getElementById('face');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const options = document.querySelectorAll('.option');
+        const eyes = document.querySelectorAll('.eye');
+        const pupils = document.querySelectorAll('.pupil');
+
+        // 表情映射
+        const emotions = ['happy', 'sad'];
+
+        // 更新表情
+        function updateFace(emotion) {
+            // 移除所有表情类
+            face.classList.remove('happy', 'sad');
+            // 添加新表情类
+            face.classList.add(emotion);
+        }
+
+        // 根据鼠标位置获取表情索引
+        function getEmotionIndexFromMousePosition(x, y) {
+            // 获取窗口宽度
+            const windowWidth = window.innerWidth;
+            // 根据x坐标计算表情索引
+            // 将窗口宽度分为2个区域，对应2种表情
+            const segmentWidth = windowWidth / 2;
+            const index = Math.floor(x / segmentWidth);
+            // 确保索引在有效范围内
+            return Math.max(0, Math.min(1, index));
+        }
+
+        // 处理鼠标移动
+        function handleMouseMove(e) {
+            const index = getEmotionIndexFromMousePosition(e.clientX, e.clientY);
+            const emotion = emotions[index];
+            updateFace(emotion);
+            
+            // 眼睛跟随鼠标
+            updateEyesPosition(e.clientX, e.clientY);
+        }
+
+        // 眼睛跟随鼠标
+        function updateEyesPosition(mouseX, mouseY) {
+            // 获取脸的位置和大小
+            const faceRect = face.getBoundingClientRect();
+            const faceCenterX = faceRect.left + faceRect.width / 2;
+            const faceCenterY = faceRect.top + faceRect.height / 2;
+            
+            // 计算鼠标相对于脸中心的位置
+            const deltaX = mouseX - faceCenterX;
+            const deltaY = mouseY - faceCenterY;
+            
+            // 计算眼睛移动的距离（限制在合理范围内）
+            const maxEyeMove = 8;
+            const eyeMoveX = Math.max(-maxEyeMove, Math.min(maxEyeMove, deltaX / 15));
+            const eyeMoveY = Math.max(-maxEyeMove, Math.min(maxEyeMove, deltaY / 15));
+            
+            // 更新眼睛位置
+            eyes.forEach(eye => {
+                eye.style.transform = `translate(${eyeMoveX}px, ${eyeMoveY}px)`;
+            });
+            
+            // 计算瞳孔移动的距离（限制在合理范围内）
+            const maxPupilMove = 3;
+            const pupilMoveX = Math.max(-maxPupilMove, Math.min(maxPupilMove, deltaX / 10));
+            const pupilMoveY = Math.max(-maxPupilMove, Math.min(maxPupilMove, deltaY / 10));
+            
+            // 更新瞳孔位置
+            pupils.forEach(pupil => {
+                pupil.style.transform = `translate(calc(-50% + ${pupilMoveX}px), calc(-50% + ${pupilMoveY}px))`;
+            });
+        }
+
+        // 为每个选项添加鼠标事件
+        options.forEach((option, index) => {
+            option.addEventListener('mouseenter', function() {
+                const emotion = this.dataset.emotion;
+                updateFace(emotion);
+            });
+
+            option.addEventListener('click', function() {
+                const emotion = this.dataset.emotion;
+                
+                if (emotion === 'happy') {
+                    // 跳转到感谢页面
+                    window.location.href = 'thankyou.html';
+                } else if (emotion === 'sad') {
+                    // 显示弹窗并移动按钮
+                    showNextPopupAndMove(this);
+                }
+                
+                updateFace(emotion);
+            });
+        });
+
+        // 弹窗消息列表
+        const popupMessages = [
+            '你不想家吗',
+            '家里的床不比学校舒服吗',
+            '闷在寝室好玩吗',
+            '还是不肯回家？',
+            '你必须给我回家'
+        ];
+        
+        // 记录每个按钮的弹窗索引
+        const buttonPopupIndex = new Map();
+
+        // 显示下一个弹窗并移动按钮
+        function showNextPopupAndMove(button) {
+            // 获取当前按钮的弹窗索引
+            let currentIndex = buttonPopupIndex.get(button) || 0;
+            
+            // 显示当前弹窗
+            if (currentIndex < popupMessages.length) {
+                alert(popupMessages[currentIndex]);
+                currentIndex++;
+                buttonPopupIndex.set(button, currentIndex);
+                
+                // 如果是最后一个弹窗，隐藏按钮
+                if (currentIndex === popupMessages.length) {
+                    button.style.display = 'none';
+                } else {
+                    // 使用原来的趣味性移动功能
+                    moveButtonNearFace(button, currentIndex);
+                }
+            }
+        }
+
+        // 在游戏区域内移动按钮
+        function moveButtonNearFace(button, moveCount) {
+            // 获取选项容器的位置和大小
+            const optionsContainer = document.getElementById('optionsContainer');
+            const containerWidth = optionsContainer.clientWidth;
+            const containerHeight = optionsContainer.clientHeight;
+            
+            // 按钮尺寸
+            const buttonWidth = 120;
+            const buttonHeight = 60;
+            
+            // 计算可移动区域的边界
+            const maxLeft = containerWidth - buttonWidth;
+            const maxTop = containerHeight - buttonHeight;
+            
+            let randomLeft, randomTop;
+            
+            // 检查是否已经移动超过10次
+            if (moveCount < 10) {
+                // 在前10次移动中，限制在中间80%的区域
+                const middleWidthStart = maxLeft * 0.1;
+                const middleWidthEnd = maxLeft * 0.9;
+                const middleHeightStart = maxTop * 0.1;
+                const middleHeightEnd = maxTop * 0.9;
+                
+                // 在中间80%区域内生成随机位置
+                randomLeft = Math.random() * (middleWidthEnd - middleWidthStart) + middleWidthStart;
+                randomTop = Math.random() * (middleHeightEnd - middleHeightStart) + middleHeightStart;
+            } else {
+                // 超过10次后，可以在整个容器区域内移动
+                randomLeft = Math.random() * maxLeft;
+                randomTop = Math.random() * maxTop;
+            }
+            
+            // 确保位置有效
+            randomLeft = Math.max(0, Math.min(maxLeft, randomLeft));
+            randomTop = Math.max(0, Math.min(maxTop, randomTop));
+            
+            // 添加一些随机的动画效果增加趣味性
+            const animations = ['bounce', 'shake', 'rotate'];
+            const randomAnimation = animations[Math.floor(Math.random() * animations.length)];
+            
+            // 应用动画效果
+            button.style.animation = 'none';
+            setTimeout(() => {
+                if (randomAnimation === 'bounce') {
+                    button.style.animation = 'bounce 0.5s ease-in-out';
+                } else if (randomAnimation === 'shake') {
+                    button.style.animation = 'shake 0.5s ease-in-out';
+                } else if (randomAnimation === 'rotate') {
+                    button.style.animation = 'rotate 0.5s ease-in-out';
+                }
+            }, 10);
+            
+            // 设置按钮位置为绝对定位（相对于选项容器）
+            button.style.position = 'absolute';
+            button.style.left = randomLeft + 'px';
+            button.style.top = randomTop + 'px';
+            button.style.zIndex = '1000'; // 确保按钮在最上层
+        }
+
+        // 添加全页面鼠标移动事件监听器
+        document.addEventListener('mousemove', handleMouseMove);
+
+        // 初始化
+        updateFace('happy');
+
+        // 创建粒子效果
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 20;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // 随机位置
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                
+                // 随机大小
+                const size = Math.random() * 8 + 4;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                
+                // 随机动画延迟
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 初始化粒子效果
+        createParticles();
+    </script>
+</body>
+</html>
